@@ -67,12 +67,12 @@ source .venv/bin/activate
 
 Start the MCP server
 ```
-uv run server.py
+uv run src/server.py
 ```
 
 In a separate terminal, run the MCP client
 ```
-uv run client.py
+uv run src/client.py
 ```
 
 You should see
