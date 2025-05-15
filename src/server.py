@@ -1,8 +1,12 @@
-import json
+from datetime import datetime
+import os
+
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("My mcp", stateless_http=True, host="127.0.0.1", port=8000)
+HOST = os.getenv("MCP_SERVER_HOST", "127.0.0.1")
+PORT = os.getenv("MCP_SERVER_PORT", 8000)
 
+mcp = FastMCP("My mcp", stateless_http=True, host=HOST, port=PORT)
 
 @mcp.tool()
 def to_upper_case(input_str: str) -> str:
@@ -12,10 +16,9 @@ def to_upper_case(input_str: str) -> str:
 def get_user_id(user_name: str) -> str:
     return user_name.encode("utf-8").hex()
 
-@mcp.resource("users://names")
-def list_users()-> list[str]:
-    user_names = ["alice", "bob", "charlie", "dave", "eve"]
-    return user_names
+@mcp.resource("time://now")
+def get_time() -> str:
+    return datetime.now().isoformat()
 
 
 if __name__ == "__main__":
