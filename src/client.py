@@ -5,10 +5,9 @@ import time
 from pydantic import FileUrl
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
-from mcp.types import ListRootsResult, Root
+from mcp.types import ListRootsResult, Root, CreateMessageRequestParams, CreateMessageResult, TextContent
 from mcp.shared.context import RequestContext
 
-SERVER_URL = os.getenv("MCP_SERVER_URL", "http://127.0.0.1:8000/mcp/")
 
 async def list_roots_callback(context: RequestContext[ClientSession, None]) -> ListRootsResult:
     print("List roots callback triggered")
@@ -25,11 +24,26 @@ async def list_roots_callback(context: RequestContext[ClientSession, None]) -> L
         ]
     )
 
+async def sampling_callback(
+    context: RequestContext[ClientSession, None],
+    params: CreateMessageRequestParams,
+) -> CreateMessageResult:
+    print("Sampling callback triggered")
+    return CreateMessageResult(
+        role="assistant",
+        content=TextContent(
+            type="text", text="This is a response from the sampling callback"
+        ),
+        model="test-model",
+        stopReason="endTurn",
+    )
+
 async def main():
+    SERVER_URL = os.getenv("MCP_SERVER_URL", "http://127.0.0.1:8000/mcp/")
     print(f"Connecting to server at {SERVER_URL}...")
 
     async with streamablehttp_client(SERVER_URL) as (read, write, _):
-        async with ClientSession(read, write, list_roots_callback=list_roots_callback) as session:
+        async with ClientSession(read, write, list_roots_callback=list_roots_callback, sampling_callback=sampling_callback) as session:
             await session.initialize()
             print()
 
@@ -49,8 +63,14 @@ async def main():
             time.sleep(1)
 
             # Call tool to check file exists on server, within directories defined by client via Roots
-            print("# Call tool")
+            print("# Call tool to test list_roots")
             res = await session.call_tool("file_exists", {"filename": "pyproject.toml"})
+            print(f"Response: {res.content[0].text}\n")
+            time.sleep(1)
+
+            # Call tool to test sampling, i.e. server calling LLM via client
+            print("# Call tool to test sampling")
+            res = await session.call_tool("sampling_test", {"message": "some input"})
             print(f"Response: {res.content[0].text}\n")
             time.sleep(1)
 

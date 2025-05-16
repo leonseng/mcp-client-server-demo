@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 
 from mcp.server.fastmcp import FastMCP
-from mcp.server.fastmcp.server import Context
+from mcp.types import SamplingMessage, TextContent
 
 HOST = os.getenv("MCP_SERVER_HOST", "127.0.0.1")
 PORT = os.getenv("MCP_SERVER_PORT", 8000)
@@ -18,8 +18,8 @@ def get_time() -> str:
     return datetime.now().isoformat()
 
 @mcp.tool()
-async def file_exists(filename: str, ctx: Context) -> None:
-    roots = await ctx.session.list_roots()  # list roots defined by client to define search boundary on server
+async def file_exists(filename: str) -> str:
+    roots = await mcp.get_context().session.list_roots()  # list roots defined by client to define search boundary on server
 
     for r in roots.roots:
         if r.name.startswith("search_directory"):
@@ -32,6 +32,19 @@ async def file_exists(filename: str, ctx: Context) -> None:
                 return f"Found {filename} in {file_dir}"
 
     return f"File {filename} does not exist."
+
+@mcp.tool()
+async def sampling_test(message: str) -> None:
+    value = await mcp.get_context().session.create_message(
+            messages=[
+                SamplingMessage(
+                    role="user", content=TextContent(type="text", text=message)
+                )
+            ],
+            max_tokens=100,
+        )
+
+    return value.content.text
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
