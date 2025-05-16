@@ -2,15 +2,12 @@ from datetime import datetime
 import os
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.server import Context
 
 HOST = os.getenv("MCP_SERVER_HOST", "127.0.0.1")
 PORT = os.getenv("MCP_SERVER_PORT", 8000)
 
-mcp = FastMCP("My mcp", stateless_http=True, host=HOST, port=PORT)
-
-@mcp.tool()
-def to_upper_case(input_str: str) -> str:
-    return input_str.upper()
+mcp = FastMCP("My mcp", host=HOST, port=PORT)
 
 @mcp.resource("users://{user_name}/id")
 def get_user_id(user_name: str) -> str:
@@ -20,6 +17,21 @@ def get_user_id(user_name: str) -> str:
 def get_time() -> str:
     return datetime.now().isoformat()
 
+@mcp.tool()
+async def file_exists(filename: str, ctx: Context) -> None:
+    roots = await ctx.session.list_roots()  # list roots defined by client to define search boundary on server
+
+    for r in roots.roots:
+        if r.name.startswith("search_directory"):
+            file_dir = r.uri.host + r.uri.path if r.uri.host else r.uri.path
+            # convert to absolute path
+            if not os.path.isabs(file_dir):
+                file_dir = os.path.abspath(file_dir)
+
+            if os.path.exists(os.path.join(file_dir, filename)):
+                return f"Found {filename} in {file_dir}"
+
+    return f"File {filename} does not exist."
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
