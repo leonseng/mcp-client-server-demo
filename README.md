@@ -97,6 +97,12 @@ content-length: 0
 <details>
 <summary>Initialization and server-to-client messages</summary>
 
+<br>
+
+Some of the messages sent by the server via SSE have corresponding responses from the client in the form of HTTP POSTs from the client, as seen in the <a href="#client-to-server-response-messages">Client-To-Server Messages</a> section.
+
+<br>
+
 ```
 GET /mcp/ HTTP/1.1
 Host: 127.0.0.1:8000
@@ -119,18 +125,23 @@ mcp-session-id: a9392932da2f4e6b966d3e22cae980aa
 x-accel-buffering: no
 Transfer-Encoding: chunked
 
+# server calling client feature to list roots
 event: message
 data: {"method":"roots/list","jsonrpc":"2.0","id":0}
 
+# server calling client feature to sample LLM
 event: message
 data: {"method":"sampling/createMessage","params":{"messages":[{"role":"user","content":{"type":"text","text":"some input"}}],"maxTokens":100},"jsonrpc":"2.0","id":1}
 
+# server sending ping to client
 event: message
 data: {"method":"ping","jsonrpc":"2.0","id":2}
 
+# server notifiying client of changes to list of tools
 event: message
 data: {"method":"notifications/tools/list_changed","jsonrpc":"2.0"}
 
+# server sending logs to client
 event: message
 data: {"method":"notifications/message","params":{"level":"info","logger":"log_stream","data":"This is sent via secondary SSE stream"},"jsonrpc":"2.0"}
 ```
