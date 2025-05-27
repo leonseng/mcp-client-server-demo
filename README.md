@@ -2,11 +2,9 @@
 
 Basic demo of MCP client-server model using streamable HTTP as the transport protocol, created with the [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk).
 
-![](docs/image.png)
+This is also built for the purpose of understanding the mesages flows between MCP client and server, e.g. the diagram below shows the messages exchanged when the client reads a resource on the server. More message exchanges between client and server can be found [here](./docs/messages.md).
 
-Additional resources:
-- [Message exchanges between client and server](./docs/messages.md)
-- [Packet capture](docs/mcp-streamable-http.pcapng)
+![](docs/image.png)
 
 ## Demo Instructions
 

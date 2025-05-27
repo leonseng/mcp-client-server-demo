@@ -2,7 +2,7 @@
 
 ## Initialization
 
-<details>
+<details open>
 <summary>Initialization request</summary>
 
 ```
