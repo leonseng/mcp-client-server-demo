@@ -55,6 +55,8 @@ async def main():
             print("\n# List resources")
             res = await session.list_resources()
             print(f"Found {len(res.resources)} resource(s): {[r.name for r in res.resources]}")
+
+            print("\n# Get resource")
             res = await session.read_resource("time://now")
             print(f"Current time: {res.contents[0].text}")
             time.sleep(1)
@@ -65,6 +67,12 @@ async def main():
             user = "John"
             res = await session.read_resource(f"users://{user}/id")
             print(f"{user}'s ID: {res.contents[0].text}")
+            time.sleep(1)
+
+            print("\n# Call basic tool: base64_encode")
+            input_string = "hello"
+            res = await session.call_tool("base64_encode", {"input_string": input_string})
+            print(f"Response: base64 encoding of {input_string} is {res.content[0].text}")
             time.sleep(1)
 
             # Call tool to check file exists on server, within directories defined by client via Roots

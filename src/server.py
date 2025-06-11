@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime
 import os
 
@@ -16,6 +17,10 @@ def get_user_id(user_name: str) -> str:
 @mcp.resource("time://now")
 def get_time() -> str:
     return datetime.now().isoformat()
+
+@mcp.tool()
+def base64_encode(input_string: str) -> str:
+    return base64.b64encode(input_string.encode("ascii")).decode("ascii")
 
 @mcp.tool()
 async def file_exists(filename: str) -> str:
